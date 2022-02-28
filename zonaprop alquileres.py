@@ -208,4 +208,4 @@ zonaprop_baños = pd.DataFrame(zonaprop_baños)
 scrapeado = pd.concat([zonaprop_titulo, zonaprop_ubicacion, zonaprop_precio, zonaprop_divisa, zonaprop_superficie, 
                        zonaprop_ambientes, zonaprop_dormitorios, zonaprop_baños], axis=1)
 scrapeado.columns = columnas
-scrapeado.to_excel('C:/Users/Acer Nitro 5/Documents/Fundacion/zonaprop_alquileres.xlsx')
+scrapeado.to_excel('zonaprop_alquileres.xlsx')
