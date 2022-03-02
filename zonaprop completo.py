@@ -29,7 +29,7 @@ for i in paginas:
             }
         )
 
-        url = "https://www.zonaprop.com.ar/inmuebles-alquiler-posadas.html"
+        url = "https://www.zonaprop.com.ar/inmuebles-posadas.html"
         response = scraper.get(url)
 
         sopa = soup(response.text, features='lxml')
@@ -116,8 +116,8 @@ for i in paginas:
             }
         )
 
-        # url = "https://www.zonaprop.com.ar/'inmuebles-posadas-pagina-" + str(pag) + ".html"
-        url = 'https://www.zonaprop.com.ar/inmuebles-alquiler-posadas-pagina-' + str(i) + '.html'
+        url = "https://www.zonaprop.com.ar/'inmuebles-posadas-pagina-" + str(pag) + ".html"
+        #url = 'https://www.zonaprop.com.ar/inmuebles-alquiler-posadas-pagina-' + str(i) + '.html'
         response = scraper.get(url)
 
         sopa = soup(response.text, features='html.parser')
