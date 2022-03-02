@@ -15,12 +15,12 @@ zonaprop_dormitorios = []
 zonaprop_baños = []
 columnas = ['Titulo Publicacion', 'Ubicacion', 'Precio', 'Divisa', 'Superficie(M2)', 'Ambientes', 'Dormitorios', 'Baños']
 
-paginas = [i for i in range(4)]
+paginas = [i for i in range(53)]
 paginas.remove(1)
-# print(paginas)
 
 for i in paginas:
     if i == 0:
+        pass
         scraper = cloudscraper.create_scraper(
             browser={
                 'browser': 'firefox',
@@ -54,14 +54,18 @@ for i in paginas:
             ubicacion = ubicacion.replace('\n','')
             zonaprop_ubicacion.append(ubicacion)
 
-            precio = propiedad.find('div', {'data-qa' : 'precio'}).text
-            precio = precio.replace('\n','').strip()
-            divisa = precio.split()[0]
-            numero = precio.split()[1]
-            numero = numero.split('+')[0]
+            precio = propiedad.find('div', {'class' : 'firstPrice'})
+            if precio != None:
+                numero = precio.text.split()[1]
+                divisa = precio.text.split()[0]
+            else:
+                precio = propiedad.find('div', {'class' : 'amount'}).text
+                numero = precio.split()[1]
+                divisa = precio.split()[0]
+            numero = numero.replace('\n','')
             zonaprop_precio.append(numero)
             zonaprop_divisa.append(divisa)
-
+            
             caracts = propiedad.find('ul', {'class' : 'postingCardMainFeatures'})
             caracts = caracts.text.replace('\n','').strip().replace(' ', '')
 
@@ -108,93 +112,102 @@ for i in paginas:
             except:
                 zonaprop_baños.append('No se pudo leer')
     else:
-        scraper = cloudscraper.create_scraper(
-            browser={
-                'browser': 'firefox',
-                'platform': 'windows',
-                'mobile': False
-            }
-        )
+        if i != 1:    
+            scraper = cloudscraper.create_scraper(
+                browser={
+                    'browser': 'firefox',
+                    'platform': 'windows',
+                    'mobile': False
+                }
+            )
 
-        url = "https://www.zonaprop.com.ar/'inmuebles-posadas-pagina-" + str(pag) + ".html"
-        #url = 'https://www.zonaprop.com.ar/inmuebles-alquiler-posadas-pagina-' + str(i) + '.html'
-        response = scraper.get(url)
+            url = "https://www.zonaprop.com.ar/'inmuebles-posadas-pagina-" + str(i) + ".html"
+            response = scraper.get(url)
 
-        sopa = soup(response.text, features='html.parser')
+            sopa = soup(response.text, features='html.parser')
 
-        propiedades = sopa.find(id="react-posting-cards")
-        lista_propiedades = propiedades.find_all('div', class_="postingCardContent")
+            propiedades = sopa.find(id="react-posting-cards")
+            lista_propiedades = propiedades.find_all('div', class_="postingCardContent")
 
-        for propiedad in lista_propiedades:
-            titulo_propiedad = propiedad.find('a', {'class' : 'go-to-posting'})
-            if titulo_propiedad != None:
-                titulo_propiedad = titulo_propiedad.text.upper()
-            else:
-                titulo_propiedad = propiedad.find('div', {'class' : 'mosaicTitle'}).text
-            titulo_propiedad = titulo_propiedad.replace('\n','').upper()
-            zonaprop_titulo.append(titulo_propiedad)
-
-            ubicacion = propiedad.find('span', {'class' : 'postingCardLocationTitle'})
-            if ubicacion != None:
-                ubicacion = ubicacion.text.upper()
-            else:
-                ubicacion = propiedad.find('span', {'data-qa' : 'direccion'}).text.upper()
-            ubicacion = ubicacion.replace('\n','')
-            zonaprop_ubicacion.append(ubicacion)
-
-            precio = propiedad.find('div', {'data-qa' : 'precio'}).text
-            precio = precio.replace('\n','').strip()
-            divisa = precio.split()[0]
-            numero = precio.split()[1]
-            numero = numero.split('+')[0]
-            zonaprop_precio.append(numero)
-            zonaprop_divisa.append(divisa)
-
-            caracts = propiedad.find('ul', {'class' : 'postingCardMainFeatures'})
-            caracts = caracts.text.replace('\n','').strip().replace(' ', '')
-
-            try:    
-                if 'm²' in caracts:
-                    superficie = caracts.split('m²')[0]
+            for propiedad in lista_propiedades:
+                titulo_propiedad = propiedad.find('a', {'class' : 'go-to-posting'})
+                if titulo_propiedad != None:
+                    titulo_propiedad = titulo_propiedad.text.upper()
                 else:
-                    superficie = 'No informa'
-                zonaprop_superficie.append(superficie)
-            except:
-                zonaprop_superficie.append('No se pudo leer')
+                    titulo_propiedad = propiedad.find('div', {'class' : 'mosaicTitle'}).text
+                titulo_propiedad = titulo_propiedad.replace('\n','').upper()
+                zonaprop_titulo.append(titulo_propiedad)
 
-            try:
-                if 'amb.' in caracts:
-                    ambientes = caracts.split('m²')[1].split('amb')[0]
-                elif 'ambientes' in caracts:
-                    ambientes = caracts.split('m²')[1].split('ambientes')[0]
+                ubicacion = propiedad.find('span', {'class' : 'postingCardLocationTitle'})
+                if ubicacion != None:
+                    ubicacion = ubicacion.text.upper()
                 else:
-                    ambientes = 'No informa'
-                zonaprop_ambientes.append(ambientes)
-            except:
-                zonaprop_ambientes.append('No se pudo leer')
-            
-            try:
-                if 'dorm.' in caracts:
-                    dormitorios = caracts.split('dorm')[0]
-                    dormitorios = dormitorios[-1]
-                else:
-                    dormitorios = 'No informa'
-                zonaprop_dormitorios.append(dormitorios)
-            except:
-                zonaprop_dormitorios.append('No se pudo leer')
+                    ubicacion = propiedad.find('span', {'data-qa' : 'direccion'}).text.upper()
+                ubicacion = ubicacion.replace('\n','')
+                zonaprop_ubicacion.append(ubicacion)
 
-            try:
-                if 'baño' in caracts:
-                    baños = caracts.split('baño')[0]
-                    baños = baños[-1]
-                elif 'baños' in caracts:
-                    baños = caracts.split('baños')[0]
-                    baños = baños[-1]
-                else:
-                    baños = 'No informa'
-                zonaprop_baños.append(baños)
-            except:
-                zonaprop_baños.append('No se pudo leer')
+                precio = propiedad.find('div', {'class' : 'firstPrice'})
+                try:
+                    if precio != None:
+                        numero = precio.text.split()[1]
+                        divisa = precio.text.split()[0]
+                    else:
+                        precio = propiedad.find('div', {'class' : 'amount'}).text
+                        numero = precio.split()[1]
+                        divisa = precio.split()[0]
+                except:
+                    numero = 'NN'
+                    divisa = 'NN'
+
+                numero = numero.replace('\n','')
+                zonaprop_precio.append(numero)
+                zonaprop_divisa.append(divisa)
+
+                caracts = propiedad.find('ul', {'class' : 'postingCardMainFeatures'})
+                caracts = caracts.text.replace('\n','').strip().replace(' ', '')
+
+                try:    
+                    if 'm²' in caracts:
+                        superficie = caracts.split('m²')[0]
+                    else:
+                        superficie = 'No informa'
+                    zonaprop_superficie.append(superficie)
+                except:
+                    zonaprop_superficie.append('No se pudo leer')
+
+                try:
+                    if 'amb.' in caracts:
+                        ambientes = caracts.split('m²')[1].split('amb')[0]
+                    elif 'ambientes' in caracts:
+                        ambientes = caracts.split('m²')[1].split('ambientes')[0]
+                    else:
+                        ambientes = 'No informa'
+                    zonaprop_ambientes.append(ambientes)
+                except:
+                    zonaprop_ambientes.append('No se pudo leer')
+                
+                try:
+                    if 'dorm.' in caracts:
+                        dormitorios = caracts.split('dorm')[0]
+                        dormitorios = dormitorios[-1]
+                    else:
+                        dormitorios = 'No informa'
+                    zonaprop_dormitorios.append(dormitorios)
+                except:
+                    zonaprop_dormitorios.append('No se pudo leer')
+
+                try:
+                    if 'baño' in caracts:
+                        baños = caracts.split('baño')[0]
+                        baños = baños[-1]
+                    elif 'baños' in caracts:
+                        baños = caracts.split('baños')[0]
+                        baños = baños[-1]
+                    else:
+                        baños = 'No informa'
+                    zonaprop_baños.append(baños)
+                except:
+                    zonaprop_baños.append('No se pudo leer')
 
 zonaprop_precio = pd.DataFrame(zonaprop_precio)
 zonaprop_divisa = pd.DataFrame(zonaprop_divisa)
@@ -208,4 +221,6 @@ zonaprop_baños = pd.DataFrame(zonaprop_baños)
 scrapeado = pd.concat([zonaprop_titulo, zonaprop_ubicacion, zonaprop_precio, zonaprop_divisa, zonaprop_superficie, 
                        zonaprop_ambientes, zonaprop_dormitorios, zonaprop_baños], axis=1)
 scrapeado.columns = columnas
-scrapeado.to_excel('zonaprop_alquileres.xlsx')
+# scrapeado.to_excel('C:/Users/Acer Nitro 5/Documents/Fundacion/zonaprop_alquileres.xlsx')
+
+print(scrapeado)
